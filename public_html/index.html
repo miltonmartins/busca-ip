@@ -6,11 +6,13 @@
         <meta name="description" content="Simple Map">
         <meta name="keywords" content="ng-map,AngularJS,center">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="bootstrap/css/bootstrap-flat.min.css">
         <link rel="stylesheet" href="css/app.css">
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+        <script src="bootstrap/js/bootstrap.min.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js"></script>
+        <script src="http://maps.google.com/maps/api/js?sensor=false"></script>
         <script src="js/app.js"></script>
+        <script src="js/ng-map.min.js"></script>
     </head>
     <body ng-app="buscaIp" ng-controller="buscaIpController">
         <nav class="navbar navbar-default navbar-static-top">
@@ -22,7 +24,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="#">Seu IP</a>
+                    <a class="navbar-brand" href="#">IP-Find</a>
                 </div>
                 <div class="collapse navbar-collapse">
                     <ul class="nav navbar-nav">
@@ -35,71 +37,69 @@
             <div class="form-group">
                 <label class="control-label">Endereço de IP</label>
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Ex: 192.168.0.1" ng-model="ip">
+                    <input type="text" class="form-control" placeholder="Ex: 192.168.0.1" ng-model="ip" ng-keypress="pressEnter($event, ip)">
                     <span class="input-group-btn">
-                        <button class="btn btn-primary" ng-click="buscaLocalizacao(ip)" type="button">Localizar</button>
+                        <button id="buscaIp" class="btn btn-primary" ng-click="buscaLocalizacao(ip)" type="button">Localizar</button>
                     </span>
                 </div>
             </div>
-            <table class="table table-hover" ng-init="meuIp(ip)" ng-show="dados">
-                <tbody>
-                    <tr>
-                        <th class="">Seu IP</th>
-                        <td type="text" name="ip" ng-model="dados.ipAddress">{{dados.ipAddress}}</td>
-                    </tr>
-                </tbody>
-                <tr>
-                    <td>Cidade</td>
-                    <td ng-model="dados.cityName">{{dados.cityName}}</td>
-                </tr>
-                <tr>
-                    <td>Cep</td>
-                    <td ng-model="dados.zipCode">{{dados.zipCode}}</td>
-                </tr>   
-                <tr>
-                    <td>Estado</td>
-                    <td ng-model="dados.regionName">{{dados.regionName}}</td>
-                </tr>
-                <tr>
-                    <td>País</td>
-                    <td ng-model="dados.countryName">{{dados.countryName}}</td>
-                </tr>
-                <tr>
-                    <td>Latitude</td>
-                    <td ng-model="dados.latitude">{{dados.latitude}}</td>
-                </tr>
-                <tr>
-                    <td>Longitude</td>
-                    <td ng-model="dados.longitude">{{dados.longitude}}</td>
-                </tr>
-            </table>
-            
-            <div id="map" ng-init="initMap({{dados.latitude}}, {{dados.longitude}})"></div>
-<!--            <script>
-              function initMap() {
-                var mapDiv = document.getElementById('map');
-                var map = new google.maps.Map(mapDiv, {
-                  center: {lat: 14, lng: 15},
-                  zoom: 8
-                });
-              };
-            </script>-->
-            <script src="https://maps.googleapis.com/maps/api/js?callback=initMap"
-                async defer></script>
-            
-            <div ng-show="todosDados.length > 0">
+            <div class="row">
+                <div class="col-md-6">
+                    <table class="table table-hover" ng-init="meuIp(ip)" ng-show="dados">
+                        <tr>
+                            <td class="">Seu endereço IP</td>
+                            <td type="text" name="ip" ng-model="dados.ipAddress">{{dados.ipAddress}}</td>
+                        </tr>
+                        <tr>
+                            <td>Cidade</td>
+                            <td ng-model="dados.cityName">{{dados.cityName}}</td>
+                        </tr>
+                        <tr>
+                            <td>Cep</td>
+                            <td ng-model="dados.zipCode">{{dados.zipCode}}</td>
+                        </tr>   
+                        <tr>
+                            <td>Estado</td>
+                            <td ng-model="dados.regionName">{{dados.regionName}}</td>
+                        </tr>
+                        <tr>
+                            <td>País</td>
+                            <td ng-model="dados.countryName">{{dados.countryName}}</td>
+                        </tr>
+                        <tr>
+                            <td>Latitude</td>
+                            <td id="lat" ng-model="dados.latitude">{{dados.latitude}}</td>
+                        </tr>
+                        <tr>
+                            <td>Longitude</td>
+                            <td id="lng" ng-model="dados.longitude">{{dados.longitude}}</td>
+                        </tr>
+                    </table>                    
+                </div>
+                <div class="col-sm-6">
+                    <ng-map zoom="11" center="[{{dados.latitude}}, {{dados.longitude}}]" style="height: 260px">
+                        <marker position="[{{dados.latitude}}, {{dados.longitude}}]" />
+                        <control name="overviewMap" opened="true" />
+                    </ng-map>            
+                </div>
+            </div>
+            <div ng-show="ips.length > 0">
                 <h2>Seu Histórico de localizações</h2>
-                <table class="table table-hover" ng-init="">
+                <table class="table table-hover">
                     <tbody>
                         <tr>
-                            <th class="">IP</th>
-                            <th class="">País</th>
-                            <th class=""></th>
+                            <th>IP</th>
+                            <th>País</th>
+                            <th></th>
                         </tr>
                     </tbody>
-                    <tr ng-repeat="dados in todosDados">
-                        <td class="" ng-model="dados.ipAddress">{{dados.ipAddress}}</td><td class=""ng-model="dados.countryName">{{dados.countryName}}</td>
-                        <td><a href="#" ng-click="" class="btn btn-danger btn-xs"><span class=""></span>Excluir</a></td>
+                    <tr ng-repeat="dados in ips">
+                        <td ng-model="dados.ipAddress">{{dados.ipAddress}}</td>
+                        <td ng-model="dados.countryName">{{dados.countryName}}</td>
+                        <td class="pull-right">
+                            <a href="#" ng-click="buscaLocalizacao(dados.ipAddress)" class="btn btn-info btn-xs"><span class="glyphicon glyphicon-eye-open"></span>&nbsp;Exibir</a>
+                            <a href="#" ng-click="apagaIp($index)" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-trash"></span>&nbsp;Excluir</a>
+                        </td>
                     </tr>
                 </table>
             </div>
