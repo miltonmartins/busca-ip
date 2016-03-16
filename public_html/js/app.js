@@ -19,11 +19,14 @@ app.controller('buscaIpController', function($scope,$http){
     };
     
     $scope.buscaLocalizacao = function(ip){
-        if (!($scope.validarIp(ip))) {
-            
-        }
         $http({method: 'GET', url:'http://api.ipinfodb.com/v3/ip-city/?key=3d8ab80ef644b6b0687849e3e078a61c466260d4828e783c0301391a8d2ff347&ip='+ip+'&format=json'})
             .success(function(data){
+                if(!$scope.validarIp(data.ipAddress)) {
+                    $scope.ipInvalido = 'O endereço de IP é inválido!';
+                    $scope.ip = '';
+                    return;
+                }
+                $scope.ipInvalido = '';
                 $scope.dados = data;
                 $scope.addIp(data);
                 $scope.ip = null;
