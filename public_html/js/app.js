@@ -4,7 +4,7 @@ app.controller('buscaIpController', function($scope,$http){
     
     $scope.ips = (localStorage.getItem('ips') !== null) ? JSON.parse(localStorage.getItem('ips')) : [];
     
-    $scope.addIp = function (ip) {
+    addIp = function (ip) {
         var existe = false;
         for(var i = 0; i < $scope.ips.length; i++) {
             if($scope.ips[i].ipAddress === ip.ipAddress) {
@@ -21,14 +21,14 @@ app.controller('buscaIpController', function($scope,$http){
     $scope.buscaLocalizacao = function(ip){
         $http({method: 'GET', url:'http://api.ipinfodb.com/v3/ip-city/?key=3d8ab80ef644b6b0687849e3e078a61c466260d4828e783c0301391a8d2ff347&ip='+ip+'&format=json'})
             .success(function(data){
-                if(!$scope.validarIp(data.ipAddress)) {
+                if(!validarIp(data.ipAddress)) {
                     $scope.ipInvalido = 'O endereço de IP é inválido!';
-                    $scope.ip = '';
+                    $scope.ip = null;
                     return;
                 }
                 $scope.ipInvalido = '';
                 $scope.dados = data;
-                $scope.addIp(data);
+                addIp(data);
                 $scope.ip = null;
             })
             .error(function(){
@@ -58,7 +58,7 @@ app.controller('buscaIpController', function($scope,$http){
         }
     };
     
-    $scope.validarIp = function (ip) {
+    validarIp = function (ip) {
       var REGEX = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
       if (REGEX.test(ip))  
         {  
